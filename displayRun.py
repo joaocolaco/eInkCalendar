@@ -102,6 +102,7 @@ FOOTNOTE_FONT = ImageFont.truetype(
 	os.path.join(FONT_DICT, 'DejaVuSans.ttf'), 8)
 	
 LINE_WIDTH = 3
+CALENDAR_LINE_WIDTH = 6
 
 
 def main():
@@ -676,10 +677,31 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 	#New line
 	current_height += line_height
 	
+	#current calendar for drawing id lines
+	current_event_calendar = None
+	current_event_height_start = None
+	
 	for event in event_list:
+		if current_event_height_start == None:
+			current_event_calendar = event.calendar_name
+			current_event_height_start = current_height - event_name_font_height
+			
+		elif event.calendar_name != current_event_calendar and current_event_calendar != None:
+			current_event_calendar = event.calendar_name
+			current_event_height_stop = current_height - line_height
+			
+			draw_blk.rectangle([(PADDING_L-CALENDAR_LINE_WIDTH-column_spacing, current_event_height_start), (PADDING_L-column_spacing, current_event_height_stop)], fill=1)
+			
+			
+			current_event_calendar = event.calendar_name
+			current_event_height_start = current_height - event_name_font_height
 	
 		#Stops the for cycle if the new line will be outside the bounds or is day name/number after it is outside the bounds
 		if current_height + 2 > calendar_end_height or (last_event_day != event.start.date() and current_height + line_height*1.5 > calendar_end_height):
+			#Finish drawing the calendar line
+			current_event_height_stop = current_height - line_height
+			draw_blk.rectangle([(PADDING_L-CALENDAR_LINE_WIDTH-column_spacing, current_event_height_start), (PADDING_L-column_spacing, current_event_height_stop)], fill=1)
+			#Stops writting more calendar events
 			break
 			
 			
