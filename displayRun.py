@@ -620,7 +620,6 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 	
 	#Line height
 	line_height = event_name_font_height * 1.5
-	
 
 	#Stores the coordinate for later calculate the number of events to get
 	calendar_start_height = current_height
@@ -680,27 +679,40 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 	#current calendar for drawing id lines
 	current_event_calendar = None
 	current_event_height_start = None
-	
+
+	#Size of the event font descender to correct the calendars vertical lines.	
+	_ , event_font_descent = EVENT_NAME_FONT.getmetrics()
+
 	for event in event_list:
+	
+	#Calendar Lines
+	#Draw the lines that identify areas with same calendar.
+	#Note: As the text is aligned by its baseline all the vertical points have to be shifted dow by the size of the descending of the fon
 		if current_event_height_start == None:
 			current_event_calendar = event.calendar_name
-			current_event_height_start = current_height - event_name_font_height
+			current_event_height_start = current_height - event_name_font_height + event_font_descent
 			
 		elif event.calendar_name != current_event_calendar and current_event_calendar != None:
 			current_event_calendar = event.calendar_name
-			current_event_height_stop = current_height - line_height
-			
+			current_event_height_stop = current_height - line_height + event_font_descent
+
 			draw_blk.rectangle([(PADDING_L-CALENDAR_LINE_WIDTH-column_spacing, current_event_height_start), (PADDING_L-column_spacing, current_event_height_stop)], fill=1)
 			
 			
 			current_event_calendar = event.calendar_name
-			current_event_height_start = current_height - event_name_font_height
+			current_event_height_start = current_height - event_name_font_height + event_font_descent
 	
 		#Stops the for cycle if the new line will be outside the bounds or is day name/number after it is outside the bounds
 		if current_height + 2 > calendar_end_height or (last_event_day != event.start.date() and current_height + line_height*1.5 > calendar_end_height):
 			#Finish drawing the calendar line
-			current_event_height_stop = current_height - line_height
-			draw_blk.rectangle([(PADDING_L-CALENDAR_LINE_WIDTH-column_spacing, current_event_height_start), (PADDING_L-column_spacing, current_event_height_stop)], fill=1)
+			
+			#get the height of the last line
+			current_event_height_stop = current_height + event_font_descent - line_height
+			
+			#if this height is superior of the stored line start height it will draw the line
+			#Otherwise a new line was to be started and was to be drawn
+			if current_event_height_stop >= current_event_height_start:
+				draw_blk.rectangle([(PADDING_L-CALENDAR_LINE_WIDTH-column_spacing, current_event_height_start), (PADDING_L-column_spacing, current_event_height_stop)], fill=1)
 			#Stops writting more calendar events
 			break
 			
@@ -721,6 +733,10 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 			
 			#New Line
 			current_height += line_height
+			
+			#Resets the vertical line placement
+			current_event_calendar = event.calendar_name
+			current_event_height_start = current_height - event_name_font_height + event_font_descent
 
 		# Draw event
 		event_text = ""
