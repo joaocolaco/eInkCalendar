@@ -616,10 +616,10 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 	
 	#Font Heights
 	event_calendar_font_height = get_font_height(EVENT_CALENDAR_FONT)
-	event_name_font_height = get_font_height(EVENT_NAME_FONT)
+	event_name_font_height = get_font_height(EVENT_NAME_FONT, withDescender = True)
 	
 	#Line height
-	line_height = event_name_font_height * 1.5
+	line_height = event_name_font_height * 1.0
 
 	#Stores the coordinate for later calculate the number of events to get
 	calendar_start_height = current_height
@@ -681,7 +681,7 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 	current_event_height_start = None
 
 	#Size of the event font descender to correct the calendars vertical lines.	
-	_ , event_font_descent = EVENT_NAME_FONT.getmetrics()
+	event_font_ascent , event_font_descent = EVENT_NAME_FONT.getmetrics()
 
 	for event in event_list:
 	
