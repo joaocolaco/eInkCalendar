@@ -696,7 +696,7 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 			current_event_calendar = event.calendar_name
 			current_event_height_start = current_height - event_name_font_height + event_font_descent + event_line_vertical_padding
 			
-		elif event.calendar_name != current_event_calendar and current_event_calendar != None:
+		elif (event.calendar_name != current_event_calendar or last_event_day != event.start.date()) and current_event_calendar != None:
 			current_event_calendar = event.calendar_name
 			current_event_height_stop = current_height - line_height + event_font_descent - event_line_vertical_padding
 
