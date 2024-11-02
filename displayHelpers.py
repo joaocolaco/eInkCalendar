@@ -3,6 +3,9 @@ import os
 import random
 from typing import List, Tuple
 
+from enum import Enum
+from enum import auto
+
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 from PIL.Image import Image as TImage
@@ -128,11 +131,11 @@ def get_portal_images(cake=False, flying=False, pellet_hazard=False, bridge=Fals
 		image_light_bridge_names[bool_to_array_index(bridge)]))
 	return image_list
 
-def draw_black_red_white_text(draw_black, draw_red, text, position, font, black_density, red_density=0.0, white_density=0.0):
+def draw_black_red_white_text(draw_blk, draw_red, text, position, font, black_density, red_density=0.0, white_density=0.0):
 	"""
 	Draw text with epaper black/red color text on a black-and-white image context by controlling the density of black pixels using the existing draw contexts for black and red.
 	
-	:param draw_black: ImageDraw.Draw object for the image
+	:param draw_blk: ImageDraw.Draw object for the image
 	:param draw_red: ImageDraw.Draw object for the image
 	:param text: Text to be written
 	:param position: Tuple (x, y) for text position
@@ -174,9 +177,186 @@ def draw_black_red_white_text(draw_black, draw_red, text, position, font, black_
 				random_value = random.random()
 				if random_value < black_density:
 					# Draw a black point if the random value is below the black density 
-					draw_black.point((x + i, y + j), fill=1)
+					draw_blk.point((x + i, y + j), fill=1)
 				elif random_value < red_density + black_density:
 					#draw a red point if the value is between the black density and its sum wih the red one
 					draw_red.point((x + i, y + j), fill=1)
 					#Otherwise will stay white
+class Pattern(Enum):
+	BLACK = auto()
+	RED = auto()
+	VERTICALSTRIPES = auto()
+	HORIZONTALSTRIPES = auto()
+	DIAGONALSTRIPESLOWERRIGHT = auto()
+	DIAGONALSTRIPESUPPERRIGHT = auto()
+#import random	
+def draw_pattern(
+		pattern: Pattern,
+		draw_blk: ImageDraw.Draw,
+		draw_red: ImageDraw.Draw,
+		corner1: (int, int),
+		corner2: (int, int),
+		use_red: bool = False
+	) -> None:
+	"""
+	Draws a specified pattern within a rectangle defined by two corner points.
 
+	The pattern can be solid black, solid red, or various striped patterns (vertical, horizontal, diagonal).
+	Striped patterns can be black and white, or black and red depending on the use_red flag.
+
+	Parameters:
+	-----------
+	pattern : Pattern
+		The pattern to draw. Must be one of the defined Pattern Enum values.
+	draw_blk : ImageDraw.Draw
+		The drawing context for black color. Typically obtained from PIL.ImageDraw.Draw for the black image.
+	draw_red : ImageDraw.Draw
+		The drawing context for red color. Typically obtained from PIL.ImageDraw.Draw for the red image.
+	corner1 : (int, int)
+		The (x, y) coordinates of one corner of the rectangle.
+	corner2 : (int, int)
+		The (x, y) coordinates of the opposite corner of the rectangle.
+	use_red : bool, optional
+		If True, red color will be used in the striped patterns instead of white.
+		Default is False (black and white stripes).
+
+	Returns:
+	--------
+	None
+	"""
+	line_width = 2	# The width of the lines in the patterns
+
+	# Determine the min and max x coordinates
+	extremes_x = int(corner1[0]), int(corner2[0])
+	x_min = min(extremes_x)
+	x_max = max(extremes_x)
+
+	# Determine the min and max y coordinates
+	extremes_y = int(corner1[1]), int(corner2[1])
+	y_min = min(extremes_y)
+	y_max = max(extremes_y)
+
+	# Calculate the width and height of the rectangle
+	width = x_max - x_min
+	height = y_max - y_min
+
+	#Use for testing
+	#pattern=random.choice(list(Pattern))
+	#use_red=random.choice([True, False])
+	
+	# Draw the pattern based on the specified type
+	match pattern:
+		case Pattern.BLACK:
+			# Fill the rectangle with solid black
+			draw_blk.rectangle([corner1, corner2], fill=1)
+
+		case Pattern.RED:
+			# Fill the rectangle with solid red
+			draw_red.rectangle([corner1, corner2], fill=1)
+
+		case Pattern.VERTICALSTRIPES:
+			# Draw vertical stripes within the rectangle
+			for x in range(x_min, x_max, line_width):
+				line = [(x, y_min), (x, y_max)]
+
+				if ((x - x_min) % (line_width * 2)) == 0:
+					# Draw black stripe
+					draw_blk.line(line, width=line_width, fill=1)
+				elif use_red:
+					# Draw red stripe if use_red is True
+					draw_red.line(line, width=line_width, fill=1)
+
+		case Pattern.HORIZONTALSTRIPES:
+			# Draw horizontal stripes within the rectangle
+			for y in range(y_min, y_max, line_width):
+				line = [(x_min, y), (x_max, y)]
+
+				if ((y - y_min) % (line_width * 2)) == 0:
+					# Draw black stripe
+					draw_blk.line(line, width=line_width, fill=1)
+				elif use_red:
+					# Draw red stripe if use_red is True
+					draw_red.line(line, width=line_width, fill=1)
+
+		case Pattern.DIAGONALSTRIPESLOWERRIGHT:
+			# Draw diagonal stripes from lower left to upper right (sloping downwards to the right)
+			
+			##Correct a optical artifact for the diagonals
+			x_max = x_max-1
+			width = width-1
+			
+			# First set of lines starting from x-axis increments
+			for delta_x in range(0, width, line_width):
+				x = x_min + delta_x
+
+				line = [
+					(x, y_min),
+					(min(x_max, x + height), min(y_min + (x_max - x), y_max))
+				]
+
+				if (delta_x % (line_width * 2)) == 0:
+					# Draw black stripe
+					draw_blk.line(line, width=line_width, fill=1)
+				elif use_red:
+					# Draw red stripe (with thinner line width)
+					draw_red.line(line, width=round(line_width / 2), fill=1)
+					# The red lines are thinner to account for the extra pixels in a diagonal.
+
+			# Second set of lines starting from y-axis increments
+			for delta_y in range(0, height, line_width):
+				y = y_min + delta_y
+				
+				line = [
+					(x_min, y),
+					(min(x_max, x_min + (y_max - y)), min(y_max, y + width))
+				]
+
+				if (delta_y % (line_width * 2)) == 0:
+					# Draw black stripe
+					draw_blk.line(line, width=line_width, fill=1)
+				elif use_red:
+					# Draw red stripe
+					draw_red.line(line, width=round(line_width / 2), fill=1)
+
+		case Pattern.DIAGONALSTRIPESUPPERRIGHT:
+			# Draw diagonal stripes from upper left to lower right (sloping upwards to the right)
+			
+			##Correct a optical artifact for the diagonals
+			x_min = x_min+1
+			width = width-1
+				
+			# First set of lines starting from y-axis decrements
+			for delta_y in range(0, height, line_width):
+				y = y_max - delta_y
+				
+				line = [
+					(x_min, y),
+					(min(x_max, x_min + (y - y_min)), max(y_min, y - width))
+				]
+
+				if (delta_y % (line_width * 2)) == 0:
+					# Draw black stripe
+					draw_blk.line(line, width=line_width, fill=1)
+				elif use_red:
+					# Draw red stripe
+					draw_red.line(line, width=round(line_width / 2), fill=1)
+
+			# Second set of lines starting from x-axis increments
+			for delta_x in range(0, width, line_width):
+				x = x_min + delta_x
+
+				line = [
+					(x, y_max),
+					(min(x_max, x + height), max(y_max - (x_max - x), y_min))
+				]
+
+				if (delta_x % (line_width * 2)) == 0:
+					# Draw black stripe
+					draw_blk.line(line, width=line_width, fill=1)
+				elif use_red:
+					# Draw red stripe
+					draw_red.line(line, width=round(line_width / 2), fill=1)
+
+		case _:
+			# Default case: fill the rectangle with solid black
+			draw_blk.rectangle([corner1, corner2], fill=1)

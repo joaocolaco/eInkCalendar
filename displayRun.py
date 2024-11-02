@@ -9,6 +9,8 @@ import time
 from datetime import datetime
 import zoneinfo
 
+from enum import Enum
+
 import calendar
 
 from holidays import country_holidays
@@ -102,7 +104,7 @@ FOOTNOTE_FONT = ImageFont.truetype(
 	os.path.join(FONT_DICT, 'DejaVuSans.ttf'), 8)
 	
 LINE_WIDTH = 3
-CALENDAR_LINE_WIDTH = 6
+CALENDAR_LINE_WIDTH = 10
 
 
 def main():
@@ -677,7 +679,7 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 	current_height += line_height
 	
 	#current calendar for drawing id lines
-	current_event_calendar = None
+	event_to_draw = None
 	current_event_height_start = None
 
 	#Size of the event font descender to correct the calendars vertical lines.	
@@ -693,17 +695,23 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 	#Draw the lines that identify areas with same calendar.
 	#Note: As the text is aligned by its baseline all the vertical points have to be shifted dow by the size of the descending of the fon
 		if current_event_height_start == None:
-			current_event_calendar = event.calendar_name
+			event_to_draw = event
 			current_event_height_start = current_height - event_name_font_height + event_font_descent + event_line_vertical_padding
 			
-		elif (event.calendar_name != current_event_calendar or last_event_day != event.start.date()) and current_event_calendar != None:
-			current_event_calendar = event.calendar_name
+		elif (event.calendar_name != event_to_draw.calendar_name or last_event_day != event.start.date()) and event_to_draw != None:
 			current_event_height_stop = current_height - line_height + event_font_descent - event_line_vertical_padding
 
-			draw_blk.rectangle([(PADDING_L-CALENDAR_LINE_WIDTH-column_spacing, current_event_height_start), (PADDING_L-column_spacing, current_event_height_stop)], fill=1)
+			#draw_blk.rectangle([(PADDING_L-CALENDAR_LINE_WIDTH-column_spacing, current_event_height_start), (PADDING_L-column_spacing, current_event_height_stop)], fill=1)
+			draw_pattern(
+				Pattern[event_to_draw.pattern_fill],
+				draw_blk, 
+				draw_red, 
+				(PADDING_L-CALENDAR_LINE_WIDTH-column_spacing, current_event_height_start), 
+				(PADDING_L-column_spacing, current_event_height_stop),
+				use_red = event_to_draw.pattern_red_stripes,
+			)
 			
-			
-			current_event_calendar = event.calendar_name
+			event_to_draw = event
 			current_event_height_start = current_height - event_name_font_height + event_font_descent + event_line_vertical_padding
 	
 		#Stops the for cycle if the new line will be outside the bounds or is day name/number after it is outside the bounds
@@ -717,7 +725,14 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 			#if this height is superior of the stored line start height it will draw the line
 			#Otherwise a new line was to be started and was to be drawn
 			if current_event_height_stop >= current_event_height_start:
-				draw_blk.rectangle([(PADDING_L-CALENDAR_LINE_WIDTH-column_spacing, current_event_height_start), (PADDING_L-column_spacing, current_event_height_stop)], fill=1)
+				draw_pattern(
+					Pattern[event_to_draw.pattern_fill],
+					draw_blk, 
+					draw_red, 
+					(PADDING_L-CALENDAR_LINE_WIDTH-column_spacing, current_event_height_start), 
+					(PADDING_L-column_spacing, current_event_height_stop),
+					use_red = event_to_draw.pattern_red_stripes,
+				)
 			#Stops writting more calendar events
 			break
 			
@@ -740,7 +755,7 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 			current_height += line_height
 			
 			#Resets the vertical line placement
-			current_event_calendar = event.calendar_name
+			event_to_draw = event
 			current_event_height_start = current_height - event_name_font_height + event_font_descent
 
 		# Draw event

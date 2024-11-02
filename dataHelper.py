@@ -48,6 +48,18 @@ def get_events(max_number: int) -> List[Event]:
 			#Add a property called "calendar_name" to the event with the calendar name
 			#Will be used to identify the owner of the event  
 			setattr(event, "calendar_name", calendar_settings["calendar_name"])
+			#Will add two attributes for the calendar so it can be drawn with different patterns
+			#If they are not available will fill a default value
+			try:
+				setattr(event, "pattern_fill", calendar_settings["pattern_fill"])
+			except:
+				setattr(event, "pattern_fill", "BLACK")
+			try:
+				setattr(event, "pattern_red_stripes", calendar_settings["pattern_red_stripes"])
+			except:
+				setattr(event, "pattern_red_stripes", False)
+
+
 		
 		#Filter out the events that are before the current time (icalevents only filter by day and not hour and minute)
 		calendar_events_list = [event for event in calendar_events_list if event.end.astimezone(timezone.utc) >= current_UTC_date]

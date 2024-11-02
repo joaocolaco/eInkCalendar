@@ -186,12 +186,16 @@ Make sure that later in settings the locale is one of the selected here (and inc
  	{
  	"url": "webcal://...",
  	"calendar_name": "a name",
- 	"is_apple": True
+ 	"is_apple": True,
+ 	"pattern_fill": "DIAGONALSTRIPESUPPERRIGHT",
+	"pattern_red_stripes": False
  	},
  	{
  	"url": "webcal://...2",
  	"calendar_name": "a name2",
- 	"is_apple": True
+ 	"is_apple": True,
+ 	"pattern_fill": "VERTICALSTRIPES",
+	"pattern_red_stripes": False
  	},
      ]
     ```
@@ -200,6 +204,9 @@ Make sure that later in settings the locale is one of the selected here (and inc
 	- `URL` is the URL for the calendar (should be public)
 	- `calendar_name` is the name for displaying the calendar on the screen and
 	- `is_apple` is to indicate that Apple iCal is the provider of the url (solves some issues).
+	- `pattern_fill` can be BLACK, RED, VERTICALSTRIPES, HORIZONTALSTRIPES, DIAGONALSTRIPESLOWERRIGHT, DIAGONALSTRIPESUPPERRIGHT and will fill rectangle near the calendar appointments
+	- `pattern_red_stripes` when true a red color will be used in the striped patterns instead of white
+	
    
    
 
