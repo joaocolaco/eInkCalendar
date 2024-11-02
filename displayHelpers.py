@@ -224,7 +224,7 @@ def draw_pattern(
 	--------
 	None
 	"""
-	line_width = 2	# The width of the lines in the patterns
+	line_width = 1	# The width of the lines in the patterns
 
 	# Determine the min and max x coordinates
 	extremes_x = int(corner1[0]), int(corner2[0])
@@ -280,7 +280,7 @@ def draw_pattern(
 
 		case Pattern.DIAGONALSTRIPESLOWERRIGHT:
 			# Draw diagonal stripes from lower left to upper right (sloping downwards to the right)
-			
+			line_width = 2
 			##Correct a optical artifact for the diagonals
 			x_max = x_max-1
 			width = width-1
@@ -320,7 +320,7 @@ def draw_pattern(
 
 		case Pattern.DIAGONALSTRIPESUPPERRIGHT:
 			# Draw diagonal stripes from upper left to lower right (sloping upwards to the right)
-			
+			line_width = 2
 			##Correct a optical artifact for the diagonals
 			x_min = x_min+1
 			width = width-1

@@ -104,7 +104,7 @@ FOOTNOTE_FONT = ImageFont.truetype(
 	os.path.join(FONT_DICT, 'DejaVuSans.ttf'), 8)
 	
 LINE_WIDTH = 3
-CALENDAR_LINE_WIDTH = 10
+CALENDAR_LINE_WIDTH = 11
 
 
 def main():
