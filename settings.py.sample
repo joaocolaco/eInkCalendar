@@ -1,15 +1,23 @@
 LOCALE = "de_DE"
 
+# "pattern_fill" can be BLACK, RED, VERTICALSTRIPES, HORIZONTALSTRIPES, DIAGONALSTRIPESLOWERRIGHT, DIAGONALSTRIPESUPPERRIGHT
+# with "pattern_red_stripes" when true a red color will be used in the striped patterns instead of white.
 WEBDAV_CALENDAR_URLS = [
 	{
 	"url": "webcal://...",
 	"calendar_name": "a name",
-	"is_apple": True
+	"is_apple": True,
+	"pattern_fill": "DIAGONALSTRIPESUPPERRIGHT",
+	"pattern_red_stripes": False
+
 	},
 	{
 	"url": "webcal://...2",
 	"calendar_name": "a name2",
-	"is_apple": True
+	"is_apple": True,
+	"pattern_fill": "VERTICALSTRIPES",
+	"pattern_red_stripes": False
+
 	},
 ]
 
