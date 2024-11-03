@@ -243,7 +243,7 @@ def draw_pattern(
 	#Use for testing
 	#pattern=random.choice(list(Pattern))
 	#use_red=random.choice([True, False])
-	
+
 	# Draw the pattern based on the specified type
 	match pattern:
 		case Pattern.BLACK:
@@ -259,10 +259,10 @@ def draw_pattern(
 			for x in range(x_min, x_max, line_width):
 				line = [(x, y_min), (x, y_max)]
 
-				if ((x - x_min) % (line_width * 2)) == 0:
+				if ((x - x_min) % (line_width*3)) == 0:
 					# Draw black stripe
-					draw_blk.line(line, width=line_width, fill=1)
-				elif use_red:
+					draw_blk.line(line, width=line_width*2, fill=1)
+				elif use_red and ((x - x_min) % (line_width*3)) > line_width*2-1:
 					# Draw red stripe if use_red is True
 					draw_red.line(line, width=line_width, fill=1)
 
@@ -271,10 +271,10 @@ def draw_pattern(
 			for y in range(y_min, y_max, line_width):
 				line = [(x_min, y), (x_max, y)]
 
-				if ((y - y_min) % (line_width * 2)) == 0:
+				if ((y - y_min) % (line_width * 3)) == 0:
 					# Draw black stripe
-					draw_blk.line(line, width=line_width, fill=1)
-				elif use_red:
+					draw_blk.line(line, width=line_width*2, fill=1)
+				elif use_red and ((y - y_min) % (line_width * 3)) > line_width*2-1:
 					# Draw red stripe if use_red is True
 					draw_red.line(line, width=line_width, fill=1)
 
